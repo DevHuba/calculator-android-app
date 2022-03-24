@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
         //View binding
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        //Setting up custom toolbar fro right bg color.
+        setSupportActionBar(binding.t)
 
         //Declare variable for easy use
         val tvInput = binding.tvInput
@@ -96,7 +98,7 @@ class MainActivity : AppCompatActivity() {
                 var tvValue = tvInput.text.toString()
                 var prefix = ""
 
-                // TODO: Problem : cant add -number at the first time of app loading 
+                // TODO: Problem : cant add -number at the first time of app loading
 
                 try {
                     //Fix bug with two minuses
