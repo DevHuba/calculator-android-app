@@ -96,6 +96,8 @@ class MainActivity : AppCompatActivity() {
                 var tvValue = tvInput.text.toString()
                 var prefix = ""
 
+                // TODO: Problem : cant add -number at the first time of app loading 
+
                 try {
                     //Fix bug with two minuses
                     if (tvValue.startsWith("-")) {
@@ -104,21 +106,26 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     //Calculation logic
-                    if (tvValue.contains("-")) {
-                        val calcMethod = "-"
-                        tvInput.text = calculate(prefix, calcMethod,tvValue)
+                    when {
+                        tvValue.contains("-") -> {
+                            val calcMethod = "-"
+                            tvInput.text = calculate(prefix, calcMethod, tvValue)
 
-                    } else if (tvValue.contains("+")) {
-                        val calcMethod = "+"
-                        tvInput.text = calculate(prefix,calcMethod,tvValue)
+                        }
+                        tvValue.contains("+") -> {
+                            val calcMethod = "+"
+                            tvInput.text = calculate(prefix, calcMethod, tvValue)
 
-                    } else if (tvValue.contains("/")) {
-                        val calcMethod = "/"
-                        tvInput.text = calculate(prefix,calcMethod,tvValue)
+                        }
+                        tvValue.contains("/") -> {
+                            val calcMethod = "/"
+                            tvInput.text = calculate(prefix, calcMethod, tvValue)
 
-                    } else if (tvValue.contains("*")) {
-                        val calcMethod = "*"
-                        tvInput.text = calculate(prefix,calcMethod,tvValue)
+                        }
+                        tvValue.contains("*") -> {
+                            val calcMethod = "*"
+                            tvInput.text = calculate(prefix, calcMethod, tvValue)
+                        }
                     }
 
                 } catch (e: ArithmeticException) {
@@ -126,8 +133,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-
     }
 
     //Check is last number or dot
@@ -181,26 +186,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         //Check for calculation method and calculate
-        if (calcMethod == "-") {
-            formattedResult = removeZeroAfterDot(
-                ((firstNumber.toDouble() - secondNumber.toDouble())
-                    .toString())
-            )
-        } else if (calcMethod == "+") {
-            formattedResult = removeZeroAfterDot(
-                ((firstNumber.toDouble() + secondNumber.toDouble())
-                    .toString())
-            )
-        } else if (calcMethod == "/") {
-            formattedResult = removeZeroAfterDot(
-                ((firstNumber.toDouble() / secondNumber.toDouble())
-                    .toString())
-            )
-        } else if (calcMethod == "*") {
-            formattedResult = removeZeroAfterDot(
-                ((firstNumber.toDouble() * secondNumber.toDouble())
-                    .toString())
-            )
+        when (calcMethod) {
+            "-" -> {
+                formattedResult = removeZeroAfterDot(
+                    ((firstNumber.toDouble() - secondNumber.toDouble())
+                        .toString())
+                )
+            }
+            "+" -> {
+                formattedResult = removeZeroAfterDot(
+                    ((firstNumber.toDouble() + secondNumber.toDouble())
+                        .toString())
+                )
+            }
+            "/" -> {
+                formattedResult = removeZeroAfterDot(
+                    ((firstNumber.toDouble() / secondNumber.toDouble())
+                        .toString())
+                )
+            }
+            "*" -> {
+                formattedResult = removeZeroAfterDot(
+                    ((firstNumber.toDouble() * secondNumber.toDouble())
+                        .toString())
+                )
+            }
         }
         //Assign output
         return formattedResult
