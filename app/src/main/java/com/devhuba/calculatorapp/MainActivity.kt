@@ -5,22 +5,24 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import com.devhuba.calculatorapp.databinding.ActivityMainBinding
+import java.lang.ArithmeticException
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private var tvInput = binding.tvInput
-    private var lastNumeric: Boolean = false
-    private var lastDot: Boolean = false
+    private var isLastANumber: Boolean = false
+    private var isLastADot: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         //View binding
         val binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
 
+        //Declare variable for easy use
+        val tvInput = binding.tvInput
+
+        //Numbers
         binding.btnZero.setOnClickListener {
             tvInput.append(binding.btnZero.text)
             lastNum()
@@ -62,50 +64,151 @@ class MainActivity : AppCompatActivity() {
             lastNum()
         }
 
-        binding.btnClear.setOnClickListener { binding.tvInput.text = "" }
-        binding.btnDot.setOnClickListener {
-            if (lastNumeric && !lastDot) {
-                binding.tvInput.append(".")
-                lastNumeric = false
-                lastDot = true
-            }
-        }
+        //Operators
         binding.btnAdd.setOnClickListener {
-            onOperator(binding.btnAdd)
+            onOperator(binding.btnAdd, tvInput.text.toString(), binding)
         }
         binding.btnDivide.setOnClickListener {
-            onOperator(binding.btnDivide)
+            onOperator(binding.btnDivide, tvInput.text.toString(), binding)
         }
         binding.btnMultiply.setOnClickListener {
-            onOperator(binding.btnMultiply)
+            onOperator(binding.btnMultiply, tvInput.text.toString(), binding)
         }
         binding.btnSubtract.setOnClickListener {
-            onOperator(binding.btnSubtract)
+            onOperator(binding.btnSubtract, tvInput.text.toString(), binding)
         }
 
-    }
+        //Clear
+        binding.btnClear.setOnClickListener { binding.tvInput.text = "" }
 
-    private fun lastNum() {
-        lastNumeric = true
-        lastDot = false
-    }
-
-    private fun onOperator (view: View) {
-        if (lastNumeric && !isOperatorAdded(tvInput.text.toString())) {
-            if (view is Button) {
-                tvInput.append(view.text)
+        //Dot
+        binding.btnDot.setOnClickListener {
+            if (isLastANumber && !isLastADot) {
+                binding.tvInput.append(".")
+                isLastANumber = false
+                isLastADot = true
             }
         }
+
+        //Equals
+        binding.btnEqual.setOnClickListener {
+            if (isLastANumber) {
+                var tvValue = tvInput.text.toString()
+                var prefix = ""
+
+                try {
+                    //Fix bug with two minuses
+                    if (tvValue.startsWith("-")) {
+                        prefix = "-"
+                        tvValue = tvValue.substring(1)
+                    }
+
+                    //Calculation logic
+                    if (tvValue.contains("-")) {
+                        val calcMethod = "-"
+                        tvInput.text = calculate(prefix, calcMethod,tvValue)
+
+                    } else if (tvValue.contains("+")) {
+                        val calcMethod = "+"
+                        tvInput.text = calculate(prefix,calcMethod,tvValue)
+
+                    } else if (tvValue.contains("/")) {
+                        val calcMethod = "/"
+                        tvInput.text = calculate(prefix,calcMethod,tvValue)
+
+                    } else if (tvValue.contains("*")) {
+                        val calcMethod = "*"
+                        tvInput.text = calculate(prefix,calcMethod,tvValue)
+                    }
+
+                } catch (e: ArithmeticException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+
     }
 
-    private fun isOperatorAdded (value:String) : Boolean {
-        return if(value.startsWith("-")){
+    //Check is last number or dot
+    private fun lastNum() {
+        isLastANumber = true
+        isLastADot = false
+    }
+
+    //Remove dot and zero if we use Int
+    private fun removeZeroAfterDot(value: String): String {
+        var result = ""
+        result = if (value.contains(".0")) value.substring(0, value.length - 2) else {
+            //Fix double values in 4 digits after dot
+            val round = (value.toDouble() * 10000.0).roundToInt() / 10000.0
+            round.toString()
+        }
+        return result
+    }
+
+    //Add operator
+    private fun onOperator(view: View, boundText: String, binding: ActivityMainBinding) {
+        if (isLastANumber && !isOperatorAdded(boundText) && view is Button) {
+            binding.tvInput.append(view.text)
+            isLastANumber = false
+            isLastADot = false
+        }
+    }
+
+    //Check is operator added or not
+    private fun isOperatorAdded(value: String): Boolean {
+        return if (value.startsWith("-")) {
             false
-        }else{
+        } else {
             value.contains("/") || value.contains("*") || value.contains("+") || value.contains("-")
         }
     }
+
+    //Calculation
+    private fun calculate(
+        prefix: String,
+        calcMethod: String,
+        tvValue: String
+    ): String {
+        val splitValue = tvValue.split(calcMethod)
+        var firstNumber = splitValue[0]
+        val secondNumber = splitValue[1]
+        var formattedResult = ""
+
+//        Check for -number inserted
+        if (prefix.isNotEmpty()) {
+            firstNumber = prefix + firstNumber
+        }
+
+        //Check for calculation method and calculate
+        if (calcMethod == "-") {
+            formattedResult = removeZeroAfterDot(
+                ((firstNumber.toDouble() - secondNumber.toDouble())
+                    .toString())
+            )
+        } else if (calcMethod == "+") {
+            formattedResult = removeZeroAfterDot(
+                ((firstNumber.toDouble() + secondNumber.toDouble())
+                    .toString())
+            )
+        } else if (calcMethod == "/") {
+            formattedResult = removeZeroAfterDot(
+                ((firstNumber.toDouble() / secondNumber.toDouble())
+                    .toString())
+            )
+        } else if (calcMethod == "*") {
+            formattedResult = removeZeroAfterDot(
+                ((firstNumber.toDouble() * secondNumber.toDouble())
+                    .toString())
+            )
+        }
+        //Assign output
+        return formattedResult
+    }
 }
+
+
 
 
 

@@ -14,7 +14,6 @@
         android:background="@color/bg_result_color"
         android:gravity="end|bottom"
         android:padding="10dp"
-        android:text="@string/calc_text"
         android:textColor="@color/text_color"
         android:textSize="48sp" />
 
