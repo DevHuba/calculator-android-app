@@ -138,8 +138,7 @@ class MainActivity : AppCompatActivity() {
 
     //Remove dot and zero if we use Int
     private fun removeZeroAfterDot(value: String): String {
-        var result = ""
-        result = if (value.contains(".0")) value.substring(0, value.length - 2) else {
+        val result: String = if (value.contains(".0")) value.substring(0, value.length - 2) else {
             //Fix double values in 4 digits after dot
             val round = (value.toDouble() * 10000.0).roundToInt() / 10000.0
             round.toString()
